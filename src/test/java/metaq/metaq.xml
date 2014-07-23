@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+		
+   <!--  <bean id="sessionFactory" class="com.taobao.metamorphosis.client.extension.spring.MetaqMessageSessionFactoryBean">
+        <property name="zkConnect" value="172.16.16.66:2181"/>
+        <property name="zkSessionTimeoutMs" value="30000"/>
+        <property name="zkConnectionTimeoutMs" value="30000"/>
+        <property name="zkSyncTimeMs" value="5000"/>
+    </bean> -->
+    
+     <bean id="sessionFactory" class="com.taobao.metamorphosis.client.extension.spring.MetaqMessageSessionFactoryBean">
+        <property name="zkConnect" value="10.10.100.1:12181,10.10.100.61:12181,10.10.100.62:12181"/>
+        <property name="zkSessionTimeoutMs" value="30000"/>
+        <property name="zkConnectionTimeoutMs" value="30000"/>
+        <property name="zkSyncTimeMs" value="5000"/>
+    </bean>
+    
+    <bean id="messageBodyConverter" class="com.taobao.metamorphosis.client.extension.spring.JavaSerializationMessageBodyConverter"/>
+    
+     <bean id ="metaqTemplate" class="com.taobao.metamorphosis.client.extension.spring.MetaqTemplate">    
+        <property name="messageSessionFactory" ref="sessionFactory"/>
+        <property name="messageBodyConverter" ref="messageBodyConverter"/>
+    </bean>
+    
+    <bean id="dataRecordTopic" class="com.taobao.metamorphosis.client.extension.spring.MetaqTopic">
+        <!-- consumer group -->
+        <property name="group" value="banxGroup"/>
+        <!--  topic -->
+        <property name="topic" value="search-click-pv-data-test"/>
+        <!--  max buffer size to fetch messages -->
+        <property name="maxBufferSize" value="16384"/>
+    </bean>
+    
+    <!-- 
+    <bean id="messageListener" class="metaq.DataRecordMessageListener">
+    	<property name="processThreads" value="10"/>
+    </bean>
+    
+    <bean id ="listenerContainer" class="com.taobao.metamorphosis.client.extension.spring.MessageListenerContainer"> 
+         <property name="messageSessionFactory" ref="sessionFactory"/>
+         <property name="messageBodyConverter" ref="messageBodyConverter"/>
+         <property name="subscribers">
+             <map>
+                 <entry key-ref="dataRecordTopic" value-ref="messageListener"/>
+             </map>
+         </property>
+    </bean> -->
+</beans>

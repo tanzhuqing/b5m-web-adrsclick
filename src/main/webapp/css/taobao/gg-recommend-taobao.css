@@ -1,0 +1,52 @@
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0}
+fieldset,img{border:0}:focus{outline:0}
+ol,ul{list-style:none}
+a{ text-decoration: none;}
+em{ font-style: normal;}
+body{ font-size: 12px;}
+.clear-fix:after,
+.clear-fix:before{content:" ";display:table;}
+.clear-fix:after{clear:both;}
+.clear-fix{*zoom:1;}
+.goods-recommend{ width: 100%;  }
+.goods-recommend h3{ background: #f2f2f2; line-height: 34px; color: #666; font-size: 14px; font-weight: bold; font-family: \5fae\8f6f\96c5\9ed1; padding-left: 20px;}
+.goods-recommend .goods-list{ padding:15px 0; }
+.goods-recommend .goods-list li{ overflow: hidden;}
+.item-box{ margin: 0px auto 10px; width: 262px;}
+.item-box .pic a{display:block;vertical-align: middle;text-align:center;border:1px #e6e6e6 solid;}
+.s250{ width: 250px;}
+.s250 img{ width:248px; height: 248px;}
+.s230{ width: 230px;}
+.s230 img{ width:228px; height: 228px;}	
+.s210{ width: 210px;}
+.s210 img{ width:208px; height: 208px;}
+s190{ width: 190px;}
+.s190 img{ width:188px; height: 188px;}
+.s170{ width: 170px;}
+.s170 img{ width:168px; height: 168px;}
+
+.s160{width:160px;height: 160px;}
+.s120{width: 120px;height: 120px;}
+.s100{width: 100px;height: 100px;}
+
+* html .s160 img{width:160px;height:160px;}
+* html .s120 img{width:120px;height:120px;}
+* html .s100 img{width:100px;height:100px;}
+.goods-recommend .goods-list li p.pic img{max-width:100%;max-height:100%;vertical-align:middle;}
+.goods-recommend .goods-list li p.tit{ line-height: 18px; margin: 8px 0; height: 36px; overflow: hidden;}
+.goods-recommend .goods-list li p.tit a{color: #666; word-wrap:break-word; overflow:auto;}
+.goods-recommend .goods-list li strong{ display: block; font-size: 18px; font-weight: bold; line-height: 18px; color:#db000f; font-family: \5fae\8f6f\96c5\9ed1;}
+.goods-recommend .goods-list li strong b{ color: #a1a1a1; font-weight: normal;}
+
+.hw-goods-recommend{ border:1px #ddd solid; margin-bottom: 20px;}
+.hw-goods-recommend h3{ background: #f2f2f2; line-height: 34px; color: #666; font-size: 14px; font-weight: bold; font-family: \5fae\8f6f\96c5\9ed1; padding-left: 20px;}
+.hw-goods-recommend .goods-list{ padding:10px 9px;}
+.hw-goods-recommend .goods-list li{ margin:10px; overflow: hidden; zoom:1; float: left; _display: inline; width: 220px;}
+.hw-goods-recommend .goods-list li p.pic img{ width:218px; height: 218px; border:1px #e6e6e6 solid;}
+.hw-goods-recommend .goods-list li p.tit{ line-height: 18px; margin: 8px 0; height: 36px; overflow: hidden;}
+.hw-goods-recommend .goods-list li p.tit a{color: #666; word-wrap:break-word; overflow:auto;}
+.hw-goods-recommend .goods-list li p.tit a em{ color: #ff0000;}
+.hw-goods-recommend .goods-list li strong{ display: block; font-size: 18px; font-weight: bold; line-height: 18px; color:#db000f; font-family: \5fae\8f6f\96c5\9ed1;}
+.hw-goods-recommend .goods-list li p.btns{ margin-top: 10px;}
+.hw-goods-recommend .goods-list li p.btns a{ width: 104px; height: 28px; display: block; text-align: center; font-size: 14px;font-family: \5FAE\8F6F\96C5\9ED1; background: #db000f; line-height: 28px; font-size: 14px; color: #fff;}
+.hw-goods-recommend .goods-list li p.btns a:hover{ color:#fff;}

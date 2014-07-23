@@ -1,0 +1,1 @@
+{"analyzer_result":true,"collection":"cpcpromote","header":{"check_time":"true"},"limit":10,"offset":0,"remove_duplicated_result":false,"search":{"analyzer":{"apply_la":true,"use_original_keyword":false,"use_synonym_extension":true},"keywords":"爽肤水","ranking_model":"bm25","searching_mode":{"mode":"zambezi"}}}

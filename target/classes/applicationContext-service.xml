@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+			http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+	default-autowire="byName" default-lazy-init="false">
+
+	<context:annotation-config /> 
+	<context:property-placeholder location="classpath:config.properties" />
+
+
+	<context:component-scan base-package="com.b5m.adrs.service" />
+	<context:component-scan base-package="com.b5m.adrs.web" />
+	<!-- 该 BeanPostProcessor 将自动起作用，对标注 @Autowired 的 Bean 进行自动注入 -->
+	<bean
+		class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="minPoolSize" value="5"></property>
+		<property name="maxPoolSize" value="20"></property>
+		<property name="maxIdleTime" value="1800"></property>
+		<property name="initialPoolSize" value="5"></property>
+		<property name="preferredTestQuery" value="select count(*) from Dual"></property>
+		<property name="idleConnectionTestPeriod" value="1200"></property>
+		<property name="properties">
+			<props>
+				<prop key="user">${jdbc.username}</prop>
+				<prop key="password">${jdbc.password}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="dao" class="com.b5m.dao.impl.DaoImpl">
+		<constructor-arg index="0" ref="dataSource" />
+	</bean>
+
+	<util:properties id="properties" location="classpath:config.properties" />
+
+	<bean id="sf1Client" class="com.b5m.adrs.httpclient.sf1.impl.Sf1ClientImpl">
+		<constructor-arg index="0" value="${sf1.url}" />
+	</bean>
+	
+	<bean id="tanxClient" class="com.b5m.adrs.httpclient.sf1.impl.TanxClientImpl">
+		<constructor-arg index="0" value="${sf1.url}" />
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+				<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 页面分发器 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/" />
+		<property name="suffix" value=".jsp" />
+		<property name="cache" value="true" />
+	</bean>
+
+	<!-- xmemcached -->
+	<bean id="memcachedClient"
+		class="net.rubyeye.xmemcached.utils.XMemcachedClientFactoryBean">
+		<property name="servers" value="${memcached.adrs1.servers} ${memcached.adrs2.servers}"></property>
+		<property name="weights">
+			<list>
+				<value>1</value>
+				<value>1</value>
+			</list>
+		</property>
+		<!-- nio connection pool size -->
+		<property name="connectionPoolSize" value="10"></property>
+		<property name="commandFactory">
+			<bean class="net.rubyeye.xmemcached.command.BinaryCommandFactory"></bean>
+		</property>
+		<!-- Serializing transcoder -->
+		<property name="transcoder">
+			<bean class="net.rubyeye.xmemcached.transcoders.SerializingTranscoder" />
+		</property>
+	</bean>
+
+	<bean id="xmemcachedProxy" class="com.b5m.adrs.cache.xmemcached.XMemcachedProxy">
+		<constructor-arg index="0" ref="memcachedClient"></constructor-arg>
+		<property name="retriveTimeout" value="5000"></property>
+		<property name="writeTimeout" value="5000"></property>
+	</bean>
+	<bean class="com.b5m.adrs.cache.MemCachedUtils">
+		<property name="proxy" ref="xmemcachedProxy"></property>
+	</bean>
+	
+	<bean class="com.b5m.base.common.spring.utils.ApplicationContextUtils"/>
+	
+	<bean id="threadPool" class="java.util.concurrent.ThreadPoolExecutor">
+		<constructor-arg index="0" value="50"></constructor-arg>
+		<constructor-arg index="1" value="150"></constructor-arg>
+		<constructor-arg index="2" value="120"></constructor-arg>
+		<constructor-arg index="3" type="java.util.concurrent.TimeUnit" value="MINUTES"></constructor-arg>
+		<constructor-arg index="4">
+			<bean class="java.util.concurrent.LinkedBlockingQueue">
+				<constructor-arg index="0" value="200"></constructor-arg>
+			</bean>
+		</constructor-arg>
+	</bean>
+	
+	<aop:aspectj-autoproxy/>
+	<bean class="com.b5m.adrs.cache.CacheAop"/>
+	
+	<bean id="sessionFactory" class="com.taobao.metamorphosis.client.extension.spring.MetaqMessageSessionFactoryBean">
+        <property name="zkConnect" value="${metaq.connect.addr}"/>
+        <property name="zkSessionTimeoutMs" value="30000"/>
+        <property name="zkConnectionTimeoutMs" value="30000"/>
+        <property name="zkSyncTimeMs" value="5000"/>
+    </bean>
+    <bean id="messageBodyConverter" class="com.taobao.metamorphosis.client.extension.spring.JavaSerializationMessageBodyConverter"/>
+	<bean id="messageProducerFactory" class="com.b5m.adrs.service.MessageProducerFactory">
+		<constructor-arg index="0" ref="sessionFactory"/>
+		<constructor-arg index="1">
+			<list>
+			   <value>search-click-pv-data</value>
+			   <value>log_sponsored_ad_sf1</value>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="messageProducer" factory-bean="messageProducerFactory" factory-method="create"/>
+	
+	<bean id="antiCheatRuleService" class="com.b5m.adrs.rule.impl.AntiCheatRuleServiceImpl">
+		<property name="antiCheatRules">
+			<list>
+				<bean class="com.b5m.adrs.rule.impl.TensencondRule"></bean>
+				<bean class="com.b5m.adrs.rule.impl.SameThreeClickRule"></bean>
+				<bean class="com.b5m.adrs.rule.impl.OneMininutTenClick"></bean>
+				<bean class="com.b5m.adrs.rule.impl.OneHourTwentyClickRule"></bean>
+				<bean class="com.b5m.adrs.rule.impl.OneDayFiftyClickRule"></bean>
+				<bean class="com.b5m.adrs.rule.impl.SameIPOneDayOneHundredClickRule"></bean>
+			</list>
+		</property>
+	</bean>
+</beans>

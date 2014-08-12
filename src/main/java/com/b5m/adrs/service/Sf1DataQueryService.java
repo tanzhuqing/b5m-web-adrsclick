@@ -26,7 +26,9 @@ public interface Sf1DataQueryService {
 	 */
 	JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price);
 	
-	JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, boolean isNoCache);
+	JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, boolean isNoCache, String ref);
+	
+	JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, String ref);
 	
 	JSONArray queryData(Integer limit, Integer offset, String keywords);
 	

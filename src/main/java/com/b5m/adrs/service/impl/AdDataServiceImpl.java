@@ -229,11 +229,15 @@ public class AdDataServiceImpl implements AdDataService, InitializingBean{
 	}
 	
 	public AVLTree createDocIdRelTree(List<DocIdRel> docIdRels){
-		AVLTree avlTree = new AVLTree();
-		for(DocIdRel docIdRel : docIdRels){
-			avlTree.add(docIdRel);
+		AVLTree docIdRelsAvlTree = CacheAop.getLocalCache().getConstant("docIdRelsAvlTree", AVLTree.class);
+		if(docIdRelsAvlTree == null){
+			docIdRelsAvlTree = new AVLTree();
+			CacheAop.getLocalCache().putConstant("docIdRelsAvlTree", docIdRelsAvlTree);
 		}
-		return avlTree;
+		for(DocIdRel docIdRel : docIdRels){
+			docIdRelsAvlTree.add(docIdRel);
+		}
+		return docIdRelsAvlTree;
 	}
 	
 	@Override
@@ -282,10 +286,21 @@ public class AdDataServiceImpl implements AdDataService, InitializingBean{
 		long start = System.currentTimeMillis();
 		StringBuilder sb = new StringBuilder();
 		sb.append(" select ID as id,DOC_ID as docId from T_AD_GOOD where FLAG != -1 ");
-		List<DocIdRel> docIdRels = dao.queryBySql(sb.toString(), new Object[]{}, DocIdRel.class);
+		int totalCount = dao.queryCount(AdGood.class, Cnd.where("flag", Op.EQ, -1));
+		int page = 2000;
+		int offset = totalCount;
 		AnalysisLog.info("---->查询(AdGood):" + (System.currentTimeMillis() - start), AdDataServiceImpl.class);
-		start = System.currentTimeMillis();
-		CacheAop.getLocalCache().putConstant("docIdRelsAvlTree", createDocIdRelTree(docIdRels));
+		do{
+			offset = offset - page;
+			if(offset < 0){
+				page = page + offset;
+				offset = 0;
+			}
+			sb.append(" limit ").append(offset).append(",").append(page);
+			List<DocIdRel> docIdRels = dao.queryBySql(sb.toString(), new Object[]{}, DocIdRel.class);
+			start = System.currentTimeMillis();
+			createDocIdRelTree(docIdRels);
+		}while(offset > 0);
 		AnalysisLog.info("---->索引(AdGood):" + (System.currentTimeMillis() - start), AdDataServiceImpl.class);
 	}
 	

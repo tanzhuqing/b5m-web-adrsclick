@@ -25,6 +25,7 @@ public class Sf1Helper {
 		JSONObject jsonObject = new JSONObject();
 		buildJsonLimit(jsonObject, bean);
 		buildSearch(jsonObject, bean);
+		buildCondition(jsonObject, bean);
 		buildJsonOfSort(jsonObject, bean);
 		jsonObject.put("analyzer_result", true);
 		jsonObject.put("remove_duplicated_result", false);
@@ -58,9 +59,7 @@ public class Sf1Helper {
 	
 	protected static void buildSearch(JSONObject jsonObject, SF1SearchBean sf1SearchBean){
 		JSONObject jsonSearch = new JSONObject();
-		JSONArray cnds = new JSONArray();
 		buildGroup(jsonSearch, sf1SearchBean);
-		buildCondition(jsonSearch, sf1SearchBean);
 		jsonSearch.put("keywords", sf1SearchBean.getKeywords());
 		/*if(StringTools.isEmpty(sf1SearchBean.getCategory())){
 		}else{
@@ -74,7 +73,6 @@ public class Sf1Helper {
 		buildIn(jsonSearch, sf1SearchBean);
 		buildMode(jsonSearch, sf1SearchBean);
 		jsonObject.put("search", jsonSearch);
-		jsonObject.put("conditions", cnds);
 	}
 	
 	protected static void buildCondition(JSONObject jsonObject, SF1SearchBean sf1SearchBean){
@@ -85,7 +83,7 @@ public class Sf1Helper {
 			cnd.put("property", condSearchBean.getName());
 			cnd.put("operator", condSearchBean.getOperator());
 			JSONArray valueArray = new JSONArray();
-			for(String value : condSearchBean.getParams()){
+			for(Object value : condSearchBean.getParams()){
 				valueArray.add(value);
 			}
 			cnd.put("value", valueArray);
@@ -126,6 +124,14 @@ public class Sf1Helper {
 				sourceObject.put("value", sourceArray);
 				jsonArray.add(sourceObject);
 			}
+		}
+		if(!StringTools.isEmpty(sf1SearchBean.getPrice())){
+			JSONObject priceObject = new JSONObject();
+			JSONArray sourceArray = new JSONArray();
+			sourceArray.addAll(CollectionTools.newList(sf1SearchBean.getPrice()));
+			priceObject.put("property", "Price");
+			priceObject.put("value", sourceArray);
+			jsonArray.add(priceObject);
 		}
 		jsonObject.put("group_label", jsonArray);
 	}

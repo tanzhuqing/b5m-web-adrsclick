@@ -1,6 +1,7 @@
 package com.b5m.adrs.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -163,7 +164,16 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 		return newJsonArray;
 	}*/
 	
-	public JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, boolean isNoCache) {
+	public JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, boolean isNoCache, String ref) {
+//		if("b5trecom".equals(ref)){
+//			JSONArray jsonArray = queryDataFromSf1("苏宁易购", limit, offset, keywords, "cpcpromote", category, isDetail);
+//			int length = jsonArray.size();
+//			for(int index = 0; index < length; index++){
+//				JSONObject jsonObject = jsonArray.getJSONObject(index);
+//				jsonObject.put("CpcPrice", "0.1");
+//			}
+//			return jsonArray;
+//		}
 		if(!isNoCache){//不进行缓存的 不需要记录
 			LogUtils.info(keywords, "keywords", false);
 		}
@@ -180,14 +190,14 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 		if(isTimelimit()){//如果是在时间限制内的，则只查询蘑菇街的数据，主要为了去除m18的数据
 			source = "蘑菇街";
 		}
-		JSONArray jsonArray = queryDataFromSf1(source, limit, offset, keywords, "cpcpromote", category, isDetail);
+		JSONArray jsonArray = queryDataFromSf1(source, limit, offset, keywords, "cpcpromote", category, isDetail, price);
 		Collections.sort(jsonArray, new Comparator<Object>(){
 
 			@Override
 			public int compare(Object o1, Object o2) {
 				JSONObject jsono1 = (JSONObject) o1;
 				JSONObject jsono2 = (JSONObject) o2;
-				String price1 = jsono1.getString("cpcprice");
+				String price1 = jsono1.getString("CpcPrice");
 				int compare = 0;
 				if(StringUtils.isEmpty(price1)){
 					compare = 1;
@@ -207,7 +217,7 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 		}
 		if(dataSize >= limit) return newJsonArray;
 		//从sf1查询数据 添加cpc数据
-		jsonArray = queryDataFromSf1(limit, offset, keywords, "cpc", category, isDetail);
+		jsonArray = queryDataFromSf1(limit, offset, keywords, "cpc", category, isDetail, price);
 		addDataFromSf1(newJsonArray, jsonArray, docIds, dataSize, limit);
 		return newJsonArray;
 	}
@@ -223,7 +233,12 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 	
 	@Override
 	public JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price) {
-		return queryData(limit, offset, keywords, category, isDetail, price, false);
+		return queryData(limit, offset, keywords, category, isDetail, price, false, "");
+	}
+	
+	@Override
+	public JSONArray queryData(Integer limit, Integer offset, String keywords, String category, Boolean isDetail, String price, String ref) {
+		return queryData(limit, offset, keywords, category, isDetail, price, false, ref);
 	}
 	
 	protected int addDataFromSf1(JSONArray newJsonArray, JSONArray jsonArray, Set<String> docIds, int dataSize, Integer limit){
@@ -340,11 +355,11 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 		return sameCpcPriceAd.get(new Random().nextInt(size));
 	}
 	
-	protected JSONArray queryDataFromSf1(Integer limit, Integer offset, String keywords, String collection, String category, Boolean isDetail){
-		return queryDataFromSf1("", limit, offset, keywords, collection, category, isDetail);
+	protected JSONArray queryDataFromSf1(Integer limit, Integer offset, String keywords, String collection, String category, Boolean isDetail, String price){
+		return queryDataFromSf1("", limit, offset, keywords, collection, category, isDetail, price);
 	}
 	
-	protected JSONArray queryDataFromSf1(String source, Integer limit, Integer offset, String keywords, String collection, String category, Boolean isDetail){
+	protected JSONArray queryDataFromSf1(String source, Integer limit, Integer offset, String keywords, String collection, String category, Boolean isDetail, String price){
 		SF1SearchBean searchBean = new SF1SearchBean();
 		searchBean.setLimit(limit);
 		searchBean.setKeywords(keywords);
@@ -352,6 +367,7 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 		searchBean.setCollection(collection);
 		searchBean.setCategory(category);
 		searchBean.setSources(source);
+		dealWithPriceCondition(searchBean, price);
 		//按销量排序
 		searchBean.addSort("SalesAmount", "DESC");
 		if(isDetail != null && isDetail){
@@ -363,6 +379,17 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 			jsonArray = queryDataFromSf1(searchBean);
 		}
 		return jsonArray;
+	}
+	
+	protected void dealWithPriceCondition(SF1SearchBean searchBean, String price){
+		if(StringUtils.isEmpty(price)) return;
+		try {
+			BigDecimal _price = new BigDecimal(price);
+			BigDecimal remain = _price.multiply(new BigDecimal("0.3")).setScale(0, RoundingMode.UP);
+			searchBean.addCondition("Price", "between", new Object[]{_price.subtract(remain).setScale(0, RoundingMode.UP), _price.add(remain).setScale(0, RoundingMode.UP)});
+		} catch (Exception e) {
+			return;
+		}
 	}
 	
 	@Override
@@ -441,7 +468,7 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 			if(StringTools.isEmpty(aid)) {
 				aid = adId(dd);
 			}
-			if(StringTools.isEmpty(aid)) {
+			if(StringTools.isEmpty(aid) && docIdRelsAvlTree != null) {
 				DocIdRel docIdRel = (DocIdRel) docIdRelsAvlTree.getItem(dd.hashCode());
 				aid = dd;
 				if(docIdRel != null){
@@ -473,7 +500,9 @@ public class Sf1DataQueryServiceImpl implements Sf1DataQueryService{
 			if("蘑菇街".equals(source)){
 				url = properties.getProperty("mogujie.cpc.jumpurl") + url;
 			}else if("趣天麦网".equals(source)){
+				price = null;
 				url = m18Url(url, req);
+				source = "m18";
 			}
 			if (price == null || new BigDecimal(price.toString()) == null || new BigDecimal(price.toString()).compareTo(BigDecimal.ZERO) <= 0) {
 				url = "http://" + properties.getProperty("b5mserver") + "/cpc/item/" + dd + ".html";

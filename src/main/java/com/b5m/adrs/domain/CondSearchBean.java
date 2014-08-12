@@ -10,9 +10,9 @@ package com.b5m.adrs.domain;
 public class CondSearchBean {
 	private String name;
 	private String operator;
-	private String[] params;
+	private Object[] params;
 	
-	public CondSearchBean(String name, String operator, String... params){
+	public CondSearchBean(String name, String operator, Object... params){
 		this.name = name;
 		this.operator = operator;
 		this.params = params;
@@ -34,11 +34,11 @@ public class CondSearchBean {
 		this.operator = operator;
 	}
 
-	public String[] getParams() {
+	public Object[] getParams() {
 		return params;
 	}
 
-	public void setParams(String[] params) {
+	public void setParams(Object[] params) {
 		this.params = params;
 	}
 

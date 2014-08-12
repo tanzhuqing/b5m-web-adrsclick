@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.b5m.dao</groupId>
 			<artifactId>b5m-dao</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
+			<version>1.0.5-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

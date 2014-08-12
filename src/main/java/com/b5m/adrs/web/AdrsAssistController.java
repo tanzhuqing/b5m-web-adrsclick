@@ -213,7 +213,7 @@ public class AdrsAssistController extends AbstractBaseController{
 	public void sf1DataBack(@PathVariable("limit") Integer limit, @PathVariable("offset") Integer offset, String uid, String cid, String keywords, String category,
 			@PathVariable("position") String position, Boolean isDetail, String price, HttpServletRequest request, HttpServletResponse response){
 		try {
-			JSONArray jsonArray = sf1DataQueryService.queryData(limit, offset, keywords, category, isDetail, price, true);
+			JSONArray jsonArray = sf1DataQueryService.queryData(limit, offset, keywords, category, isDetail, price, true, "");
 			output(response, request, jsonArray);
 		} catch (Exception e) {
 			try {

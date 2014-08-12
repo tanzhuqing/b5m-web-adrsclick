@@ -57,9 +57,9 @@ public class AdrsPageController extends AbstractBaseController {
 	@RequestMapping("/s/data/{limit}_{offset}_{position}")
 	@ResponseBody
 	public void sf1DataBack(@PathVariable("limit") Integer limit, @PathVariable("offset") Integer offset, String uid, String cid, String keywords, String category,
-			@PathVariable("position") String position, Boolean isDetail, String price, HttpServletRequest request, HttpServletResponse response){
+			@PathVariable("position") String position, Boolean isDetail, String price, String ref, HttpServletRequest request, HttpServletResponse response){
 		try {
-			JSONArray jsonArray = sf1DataQueryService.queryData(limit, offset, keywords, "", isDetail, price);
+			JSONArray jsonArray = sf1DataQueryService.queryData(limit, offset, keywords, "", isDetail, price, ref);
 			jsonArray = sf1DataQueryService.dealWithData(jsonArray, keywords, uid, cid, position, request, limit, price);
 			output(response, request, jsonArray);
 		} catch (Exception e) {

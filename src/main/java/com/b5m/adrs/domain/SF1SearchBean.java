@@ -10,6 +10,7 @@ public class SF1SearchBean {
 	private String keywords;
 	private String category;
 	private String sources;//商家过滤
+	private String price;
 	private List<CondSearchBean> condLst = new ArrayList<CondSearchBean>();
 	private List<SortSearchBean> sortList = new ArrayList<SortSearchBean>();
 	private SearchMode searchMode;
@@ -62,7 +63,7 @@ public class SF1SearchBean {
 		this.sources = sources;
 	}
 	
-	public void addCondition(String name, String operator, String... params){
+	public void addCondition(String name, String operator, Object... params){
 		condLst.add(new CondSearchBean(name, operator, params));
 	}
 
@@ -94,4 +95,12 @@ public class SF1SearchBean {
 		sortList.add(new SortSearchBean(name, type));
 	}
 
+	public String getPrice() {
+		return price;
+	}
+
+	public void setPrice(String price) {
+		this.price = price;
+	}
+	
 }
